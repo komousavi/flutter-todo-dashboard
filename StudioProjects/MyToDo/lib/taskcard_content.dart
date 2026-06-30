@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'app_text_styles.dart';
 
 
 class TaskCardContent extends StatelessWidget {
@@ -16,7 +17,7 @@ class TaskCardContent extends StatelessWidget {
       children: [
         Text(
           taskCardTitle,
-          style: TextStyle(color: Color(0xffe69057), fontSize: 17),
+          style: AppTextStyles.cardsTitle,
         ),
         SizedBox(height: 10),
         Text(

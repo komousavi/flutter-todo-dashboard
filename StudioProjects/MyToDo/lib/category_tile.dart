@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'category.dart';
-
+import 'app_colors.dart';
 
 class CategoryTile extends StatelessWidget{
   final Category category;
@@ -25,7 +25,7 @@ class CategoryTile extends StatelessWidget{
          Text(
            category.completedTasks.round().toString(),
            style: TextStyle(
-             color: Color(0xffe69057),
+             color: AppColors.progressIndicatorTitle,
              fontWeight: FontWeight.bold,
            ),
          ),

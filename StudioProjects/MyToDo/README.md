@@ -29,7 +29,7 @@ fl_chart
 
 
 
-What I Learned
+What I Learned:
 
 While building this project I practiced:
 

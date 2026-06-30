@@ -6,6 +6,8 @@ import 'category_tile.dart';
 import 'category_data.dart';
 import 'category.dart';
 import 'category_chart.dart';
+import 'app_colors.dart';
+import 'app_text_styles.dart';
 
 class InputPage extends StatefulWidget {
   const InputPage({super.key});
@@ -25,24 +27,20 @@ class _InputPageState extends State<InputPage> {
       body: SafeArea(
         child: ListView(
           children: <Widget>[
+            //Header
             Container(
               alignment: Alignment.centerLeft,
               margin: const EdgeInsets.only(left: 30, top: 30, bottom: 30),
               child: Text(
                 "Today's Tasks",
-                style: GoogleFonts.playfairDisplay(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: AppTextStyles.mainTitle
               ),
             ),
-
-            // Stats Row
             Row(
               children: [
                 Expanded(
                   child: ReusableCard(
-                    thisColor: const Color(0xffffffff),
+                    thisColor: AppColors.primaryBackGroundColor,
                     thisMargin: const EdgeInsets.only(
                       left: 20,
                       top: 5,
@@ -50,7 +48,7 @@ class _InputPageState extends State<InputPage> {
                       right: 5,
                     ),
                     cardChild: TaskCardContent(
-                      taskCardNumberColor: const Color(0xff000000),
+                      taskCardNumberColor: AppColors.black,
                       taskCardTitle: "Total",
                       taskCardNumber: "12",
                     ),
@@ -58,7 +56,7 @@ class _InputPageState extends State<InputPage> {
                 ),
                 Expanded(
                   child: ReusableCard(
-                    thisColor: const Color(0xffffffff),
+                    thisColor: AppColors.primaryBackGroundColor,
                     thisMargin: const EdgeInsets.only(
                       left: 10,
                       top: 5,
@@ -66,7 +64,7 @@ class _InputPageState extends State<InputPage> {
                       right: 10,
                     ),
                     cardChild: TaskCardContent(
-                      taskCardNumberColor: const Color(0xff469a77),
+                      taskCardNumberColor: AppColors.green,
                       taskCardTitle: "Done",
                       taskCardNumber: "4",
                     ),
@@ -74,7 +72,7 @@ class _InputPageState extends State<InputPage> {
                 ),
                 Expanded(
                   child: ReusableCard(
-                    thisColor: const Color(0xffffffff),
+                    thisColor: AppColors.primaryBackGroundColor,
                     thisMargin: const EdgeInsets.only(
                       left: 5,
                       top: 5,
@@ -82,7 +80,7 @@ class _InputPageState extends State<InputPage> {
                       right: 20,
                     ),
                     cardChild: TaskCardContent(
-                      taskCardNumberColor: const Color(0xffff4500),
+                      taskCardNumberColor: AppColors.orange,
                       taskCardTitle: "Do",
                       taskCardNumber: "8",
                     ),
@@ -93,7 +91,7 @@ class _InputPageState extends State<InputPage> {
 
             // Overall Completion Card
             ReusableCard(
-              thisColor: const Color(0xffffffff),
+              thisColor: AppColors.primaryBackGroundColor,
               thisMargin: const EdgeInsets.all(20),
               cardChild: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -101,10 +99,10 @@ class _InputPageState extends State<InputPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
-                      children: const [
+                      children: [
                         Text(
                           'Overall Completion',
-                          style: TextStyle(color: Color(0xffe69057)),
+                          style: AppTextStyles.cardsTitle,
                         ),
                       ],
                     ),
@@ -114,16 +112,13 @@ class _InputPageState extends State<InputPage> {
                     children: [
                       Text(
                           '33%',
-                          style: GoogleFonts.playfairDisplay(
-                            textStyle: const TextStyle(color: Color(0xffff4500),
-                            fontSize: 35,)
-                          )
-                      ),
+                          style: AppTextStyles.completionPercent,
+                          ),
                       SizedBox(height: 10),
                       Text(
                           "4 of 12 tasks",
                         style: TextStyle(
-                          color: Color(0xffef8c4d)
+                          color: AppColors.progressIndicatorTitle,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -133,8 +128,8 @@ class _InputPageState extends State<InputPage> {
                           minHeight: 10,
                           borderRadius: BorderRadius.circular(10),
                           value: 4 / 12,
-                          backgroundColor: Color(0xffffebd5),
-                          color: Color(0xffffa33d),
+                          backgroundColor: AppColors.progressIndicatorBackground,
+                          color: AppColors.progressIndicator,
                         ),
                       ),
                        SizedBox(height: 20),
@@ -145,13 +140,16 @@ class _InputPageState extends State<InputPage> {
             ),
 
             ReusableCard(
-              thisColor: const Color(0xffffffff),
+              thisColor: AppColors.primaryBackGroundColor,
               thisMargin: const EdgeInsets.all(20),
               cardChild: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('By Category'),
+                    Text(
+                        'By Category',
+                    style: AppTextStyles.cardsTitle),
                     Row(
                       children: [
                         Expanded(
@@ -180,17 +178,14 @@ class _InputPageState extends State<InputPage> {
                 ),
               ),
             ),
-
             ReusableCard(
-              thisColor: const Color(0xffffffff),
+              thisColor: AppColors.primaryBackGroundColor,
               thisMargin: const EdgeInsets.all(20),
             ),
-
             ReusableCard(
-              thisColor: const Color(0xffffffff),
+              thisColor: AppColors.primaryBackGroundColor,
               thisMargin: const EdgeInsets.all(20),
             ),
-
             const SizedBox(height: 20),
           ],
         ),
