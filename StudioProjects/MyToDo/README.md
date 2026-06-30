@@ -1,16 +1,57 @@
-# mytodo
+Flutter Todo Dashboard
 
-A new Flutter project.
+A clean and responsive task management dashboard built with Flutter. This project displays task statistics, completion progress, and category distribution using a modern dashboard interface.
 
-## Getting Started
+✨ Features
 
-This project is a starting point for a Flutter application.
+📊 Dashboard with task statistics
 
-A few resources to get you started if this is your first Flutter project:
+✅ Overall completion progress
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+🍩 Interactive category donut chart
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+📱 Responsive layout
+
+♻️ Reusable custom widgets
+
+🎨 Simple and modern UI
+
+
+
+🛠️ Built With
+
+Flutter
+
+Dart
+
+fl_chart
+
+
+
+
+What I Learned
+
+While building this project I practiced:
+
+Building responsive Flutter layouts
+
+Creating reusable widgets
+
+Working with Flutter widget composition
+
+Using the fl_chart package
+
+Debugging layout and dependency issues
+
+Organizing a Flutter project into smaller components
+
+
+
+
+👩‍💻 Author
+
+Kosar Mousavi
+
+GitHub: https://github.com/komousavi
+
+
