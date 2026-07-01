@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'reusable_card.dart';
 import 'taskcard_content.dart';
 import 'category_tile.dart';
@@ -8,6 +7,7 @@ import 'category.dart';
 import 'category_chart.dart';
 import 'app_colors.dart';
 import 'app_text_styles.dart';
+import 'category_filter_chip.dart';
 
 class InputPage extends StatefulWidget {
   const InputPage({super.key});
@@ -17,9 +17,14 @@ class InputPage extends StatefulWidget {
 }
 
 class _InputPageState extends State<InputPage> {
-
   List<Category> get categories => CategoryData.all;
+  String selectedCategory = "All";
 
+  static const int maxVisibleCategories = 5;
+  List<Category> get visibleCategories =>
+      categories.take(maxVisibleCategories).toList();
+  List<Category> get hiddenCategories =>
+      categories.skip(maxVisibleCategories).toList();
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +36,7 @@ class _InputPageState extends State<InputPage> {
             Container(
               alignment: Alignment.centerLeft,
               margin: const EdgeInsets.only(left: 30, top: 30, bottom: 30),
-              child: Text(
-                "Today's Tasks",
-                style: AppTextStyles.mainTitle
-              ),
+              child: Text("Today's Tasks", style: AppTextStyles.mainTitle),
             ),
             Row(
               children: [
@@ -110,13 +112,10 @@ class _InputPageState extends State<InputPage> {
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                          '33%',
-                          style: AppTextStyles.completionPercent,
-                          ),
+                      Text('33%', style: AppTextStyles.completionPercent),
                       SizedBox(height: 10),
                       Text(
-                          "4 of 12 tasks",
+                        "4 of 12 tasks",
                         style: TextStyle(
                           color: AppColors.progressIndicatorTitle,
                         ),
@@ -128,11 +127,12 @@ class _InputPageState extends State<InputPage> {
                           minHeight: 10,
                           borderRadius: BorderRadius.circular(10),
                           value: 4 / 12,
-                          backgroundColor: AppColors.progressIndicatorBackground,
+                          backgroundColor:
+                              AppColors.progressIndicatorBackground,
                           color: AppColors.progressIndicator,
                         ),
                       ),
-                       SizedBox(height: 20),
+                      SizedBox(height: 20),
                     ],
                   ),
                 ],
@@ -147,13 +147,11 @@ class _InputPageState extends State<InputPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                        'By Category',
-                    style: AppTextStyles.cardsTitle),
+                    Text('By Category', style: AppTextStyles.cardsTitle),
                     Row(
                       children: [
                         Expanded(
-                           flex: 2,
+                          flex: 2,
                           child: Padding(
                             padding: const EdgeInsets.all(20),
                             child: AspectRatio(
@@ -161,19 +159,19 @@ class _InputPageState extends State<InputPage> {
                               child: CategoryChart(),
                             ),
                           ),
-                          ),
+                        ),
                         Expanded(
                           flex: 3,
                           child: Column(
-                          children: [
-                          ...categories.map((category) {
-                        return CategoryTile(category: category);
-                        }),
-                          ],
-                        ),
+                            children: [
+                              ...categories.map((category) {
+                                return CategoryTile(category: category);
+                              }),
+                            ],
+                          ),
                         ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -181,6 +179,36 @@ class _InputPageState extends State<InputPage> {
             ReusableCard(
               thisColor: AppColors.primaryBackGroundColor,
               thisMargin: const EdgeInsets.all(20),
+              cardChild: SizedBox(
+                height: 45,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    CategoryFilterChip(
+                      categoryName: 'All',
+                      onTapAction: () {
+                        setState(() {
+                          selectedCategory = "All";
+                        });
+                      },
+                      isSelected: selectedCategory == "All",
+                    ),
+                    ...visibleCategories.map(
+                      (category) => CategoryFilterChip(
+                        categoryName: category.name,
+                        onTapAction: () {
+                          setState(() {
+                            selectedCategory = category.name;
+                          });
+                        },
+                        isSelected: selectedCategory == category.name,
+                      ),
+                    ),
+                    if (hiddenCategories.isNotEmpty)
+                      CategoryFilterChip(categoryName: "More", onTapAction: (){}, isSelected: false)
+                  ],
+                ),
+              ),
             ),
             ReusableCard(
               thisColor: AppColors.primaryBackGroundColor,
