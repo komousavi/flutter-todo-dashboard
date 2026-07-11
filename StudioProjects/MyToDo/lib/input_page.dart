@@ -205,7 +205,11 @@ class _InputPageState extends State<InputPage> {
                       ),
                     ),
                     if (hiddenCategories.isNotEmpty)
-                      CategoryFilterChip(categoryName: "More", onTapAction: (){}, isSelected: false)
+                      CategoryFilterChip(
+                        categoryName: "More",
+                        onTapAction: () {},
+                        isSelected: false,
+                      ),
                   ],
                 ),
               ),
@@ -213,6 +217,27 @@ class _InputPageState extends State<InputPage> {
             ReusableCard(
               thisColor: AppColors.primaryBackGroundColor,
               thisMargin: const EdgeInsets.all(20),
+              cardChild: SizedBox(
+                height: 45,
+                child: TextButton.icon(
+                  onPressed: () {
+                    setState(() {});
+                  },
+                  label: Text(
+                    "Add Task",
+                    style: TextStyle(color: AppColors.primaryBackGroundColor,
+                    fontSize: 17),
+                  ),
+                  icon: Icon(Icons.add,
+                  size: 20,
+                  color: AppColors.primaryBackGroundColor,),
+                  style: TextButton.styleFrom(
+                    backgroundColor: AppColors.progressIndicator,
+                    maximumSize: Size(double.infinity, double.infinity),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 20),
           ],
