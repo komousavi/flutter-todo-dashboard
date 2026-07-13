@@ -8,6 +8,7 @@ class AppTextStyles {
   static final mainTitle = GoogleFonts.playfairDisplay(
     fontSize: 30,
     fontWeight: FontWeight.bold,
+    color: Color(0xffcd5006)
   );
 
   static final cardsTitle = TextStyle(color: Color(0xffe69057), fontSize: 17);

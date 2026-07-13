@@ -8,6 +8,10 @@ import 'category_chart.dart';
 import 'app_colors.dart';
 import 'app_text_styles.dart';
 import 'category_filter_chip.dart';
+import 'task_data.dart';
+import 'task_tile.dart';
+import 'task.dart';
+import 'package:intl/intl.dart';
 
 class InputPage extends StatefulWidget {
   const InputPage({super.key});
@@ -17,8 +21,11 @@ class InputPage extends StatefulWidget {
 }
 
 class _InputPageState extends State<InputPage> {
+  DateTime selectedDate = DateTime.now();
   List<Category> get categories => CategoryData.all;
   String selectedCategory = "All";
+
+  List<Task> get tasks => TaskData.all;
 
   static const int maxVisibleCategories = 5;
   List<Category> get visibleCategories =>
@@ -34,9 +41,31 @@ class _InputPageState extends State<InputPage> {
           children: <Widget>[
             //Header
             Container(
+              margin: EdgeInsetsGeometry.only(left: 28, top: 10),
               alignment: Alignment.centerLeft,
-              margin: const EdgeInsets.only(left: 30, top: 30, bottom: 30),
-              child: Text("Today's Tasks", style: AppTextStyles.mainTitle),
+              child: TextButton.icon(
+                style: TextButton.styleFrom(
+                  backgroundColor: AppColors.progressIndicatorBackground
+                ),
+                onPressed: () {},
+                label: Text(
+                  DateFormat('EEEE, d MMMM').format(selectedDate),
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: AppColors.progressIndicatorTitle,
+                  ),
+                ),
+                icon: Icon(
+                  Icons.calendar_today_rounded,
+                  color: AppColors.progressIndicatorTitle,
+                  size: 17,
+                ),
+              ),
+            ),
+            Container(
+              alignment: Alignment.centerLeft,
+              margin: const EdgeInsets.only(left: 30, top: 5, bottom: 20),
+              child: Text("Today's Tasks", style: AppTextStyles.mainTitle ),
             ),
             Row(
               children: [
@@ -225,20 +254,27 @@ class _InputPageState extends State<InputPage> {
                   },
                   label: Text(
                     "Add Task",
-                    style: TextStyle(color: AppColors.primaryBackGroundColor,
-                    fontSize: 17),
+                    style: TextStyle(
+                      color: AppColors.primaryBackGroundColor,
+                      fontSize: 17,
+                    ),
                   ),
-                  icon: Icon(Icons.add,
-                  size: 20,
-                  color: AppColors.primaryBackGroundColor,),
+                  icon: Icon(
+                    Icons.add,
+                    size: 20,
+                    color: AppColors.primaryBackGroundColor,
+                  ),
                   style: TextButton.styleFrom(
                     backgroundColor: AppColors.progressIndicator,
                     maximumSize: Size(double.infinity, double.infinity),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 ),
               ),
             ),
+            Column(children: [...tasks.map((task) => TaskTile(task: task))]),
             const SizedBox(height: 20),
           ],
         ),
