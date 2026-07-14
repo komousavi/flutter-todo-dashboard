@@ -26,12 +26,39 @@ class _InputPageState extends State<InputPage> {
   String selectedCategory = "All";
 
   List<Task> get tasks => TaskData.all;
-
   static const int maxVisibleCategories = 5;
   List<Category> get visibleCategories =>
       categories.take(maxVisibleCategories).toList();
   List<Category> get hiddenCategories =>
       categories.skip(maxVisibleCategories).toList();
+
+  Future<DateTime?> _selectDate() async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2026),
+      lastDate: DateTime(2030),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: AppColors.progressIndicator,
+            ),
+            datePickerTheme: DatePickerThemeData(
+              backgroundColor: AppColors.primaryBackGroundColor,
+              headerBackgroundColor: AppColors.progressIndicator,
+              headerForegroundColor: Colors.white,
+              todayBackgroundColor: WidgetStateProperty.all(
+                AppColors.progressIndicator,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    return pickedDate;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,9 +72,16 @@ class _InputPageState extends State<InputPage> {
               alignment: Alignment.centerLeft,
               child: TextButton.icon(
                 style: TextButton.styleFrom(
-                  backgroundColor: AppColors.progressIndicatorBackground
+                  backgroundColor: AppColors.progressIndicatorBackground,
                 ),
-                onPressed: () {},
+                onPressed: () async {
+                  final pickedDate = await _selectDate();
+                  if (pickedDate != null) {
+                    setState(() {
+                      selectedDate = pickedDate;
+                    });
+                  }
+                },
                 label: Text(
                   DateFormat('EEEE, d MMMM').format(selectedDate),
                   style: TextStyle(
@@ -65,7 +99,7 @@ class _InputPageState extends State<InputPage> {
             Container(
               alignment: Alignment.centerLeft,
               margin: const EdgeInsets.only(left: 30, top: 5, bottom: 20),
-              child: Text("Today's Tasks", style: AppTextStyles.mainTitle ),
+              child: Text("Today's Tasks", style: AppTextStyles.mainTitle),
             ),
             Row(
               children: [
