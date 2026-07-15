@@ -308,7 +308,28 @@ class _InputPageState extends State<InputPage> {
                 ),
               ),
             ),
-            Column(children: [...tasks.map((task) => TaskTile(task: task))]),
+            Column(
+              children: [
+                ...tasks.map(
+                  (task) => TaskTile(
+                    task: task,
+                    onChanged: (bool? value) {
+                      if (value == null) {
+                        return;
+                      }
+                      setState(() {
+                        task.isCompleted = value;
+                      });
+                    },
+                    onDelete: () {
+                      setState(() {
+                        tasks.remove(task);
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 20),
           ],
         ),
