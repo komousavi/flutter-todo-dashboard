@@ -19,7 +19,7 @@ class CategoryData {
       name: "Health",
       color: Colors.green.shade400,
       completedTasks: 2,
-      icon: Icons.apple,
+      icon: Icons.favorite_rounded,
     ),
     Category(
       name: "Home",

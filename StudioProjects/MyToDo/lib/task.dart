@@ -1,12 +1,13 @@
 import 'category.dart';
 
 class Task {
-  late final String title;
-  late bool isCompleted;
-  late final Category category;
+  final String title;
+  bool isCompleted;
+  final Category category;
+  final DateTime dueDate;
 
   Task({
-    required this.title, required this.category, this.isCompleted = false,
+    required this.title, required this.category, this.isCompleted = false, required this.dueDate
 });
 
 }

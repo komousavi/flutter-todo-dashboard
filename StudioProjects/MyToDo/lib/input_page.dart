@@ -12,6 +12,7 @@ import 'task_data.dart';
 import 'task_tile.dart';
 import 'task.dart';
 import 'package:intl/intl.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 
 class InputPage extends StatefulWidget {
   const InputPage({super.key});
@@ -32,11 +33,18 @@ class _InputPageState extends State<InputPage> {
   List<Category> get hiddenCategories =>
       categories.skip(maxVisibleCategories).toList();
 
-  Future<DateTime?> _selectDate() async {
+  final _formKey = GlobalKey<FormState>();
+
+  final TextEditingController taskController = TextEditingController();
+  final TextEditingController dueDateController = TextEditingController();
+  Category? newTaskCategory;
+  DateTime? newTaskDueDate;
+
+  Future<DateTime?> _selectDate({required DateTime firstDate}) async {
     final pickedDate = await showDatePicker(
       context: context,
       initialDate: selectedDate,
-      firstDate: DateTime(2026),
+      firstDate: firstDate,
       lastDate: DateTime(2030),
       builder: (context, child) {
         return Theme(
@@ -75,7 +83,9 @@ class _InputPageState extends State<InputPage> {
                   backgroundColor: AppColors.progressIndicatorBackground,
                 ),
                 onPressed: () async {
-                  final pickedDate = await _selectDate();
+                  final pickedDate = await _selectDate(
+                    firstDate: DateTime(2026),
+                  );
                   if (pickedDate != null) {
                     setState(() {
                       selectedDate = pickedDate;
@@ -284,6 +294,280 @@ class _InputPageState extends State<InputPage> {
                 height: 45,
                 child: TextButton.icon(
                   onPressed: () {
+                    showModalBottomSheet(
+                      isScrollControlled: true,
+                      context: context,
+                      backgroundColor: Color(0xFFFFFFFF),
+                      builder: (BuildContext context) {
+                        return SingleChildScrollView(
+                          child: Padding(
+                            padding: const EdgeInsets.all(25.0),
+                            child: Form(
+                              key: _formKey,
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          //"New Task",
+                                          "New Task",
+                                          style: TextStyle(
+                                            fontSize: 25,
+                                            fontWeight: FontWeight.bold,
+                                            //color: Color(0xFF2E2A27),
+                                            color: Color(0xFFF1842D),
+                                          ),
+                                        ),
+                                      ),
+                                      Spacer(),
+                                      IconButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                          newTaskDueDate = null;
+                                          newTaskCategory = null;
+                                          taskController.clear();
+                                          dueDateController.clear();
+                                        },
+                                        icon: Icon(Icons.close_rounded),
+                                        style: IconButton.styleFrom(
+                                          backgroundColor: Color(0xFFF4F3F3),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 15),
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      "Task Title",
+                                      style: TextStyle(
+                                        fontSize: 19,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xFF625B54),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 12),
+                                  TextFormField(
+                                    validator: (value) {
+                                      if (value == null ||
+                                          value.trim().isEmpty) {
+                                        return "Please enter a task";
+                                      }
+                                      return null;
+                                    },
+                                    controller: taskController,
+                                    decoration: InputDecoration(
+                                      hintText: "write your task",
+                                      hintStyle: TextStyle(
+                                        color: Color(0xFFA89B8F),
+                                      ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(
+                                          color: Color(0xFFFFB35F),
+                                          width: 2,
+                                        ),
+                                      ),
+                                      contentPadding: EdgeInsets.all(16),
+                                    ),
+                                  ),
+                                  SizedBox(height: 15),
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      "Due Date (optional)",
+                                      style: TextStyle(
+                                        fontSize: 19,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xFF625B54),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 12),
+                                  TextFormField(
+                                    controller: dueDateController,
+                                    readOnly: true,
+                                    onTap: () async {
+                                      final pickedDate = await _selectDate(
+                                        firstDate: DateTime.now(),
+                                      );
+                                      if (pickedDate != null) {
+                                        setState(() {
+                                          newTaskDueDate = pickedDate;
+                                          dueDateController.text = DateFormat(
+                                            'MMM d EEEE, yyyy',
+                                          ).format(newTaskDueDate!);
+                                        });
+                                      }
+                                    },
+                                    decoration: InputDecoration(
+                                      hintText: "Select due date",
+                                      hintStyle: TextStyle(
+                                        color: Color(0xFFA89B8F),
+                                      ),
+                                      prefixIcon: Icon(
+                                        Icons.calendar_today_rounded,
+                                        color: Colors.grey,
+                                      ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(
+                                          color: Color(0xFFE5D7C8),
+                                        ),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(
+                                          color: Color(0xFFFFB35F),
+                                          width: 2,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 15),
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      "Category",
+                                      style: TextStyle(
+                                        fontSize: 19,
+                                        fontWeight: FontWeight.w400,
+                                        color: const Color(0xFF625B54),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 12),
+                                  DropdownButtonFormField2<Category>(
+                                    validator: (value) {
+                                      if (value == null) {
+                                        return "Please select a category";
+                                      }
+                                      return null;
+                                    },
+                                    value: newTaskCategory,
+                                    items: categories
+                                        .map(
+                                          (category) =>
+                                              DropdownMenuItem<Category>(
+                                                value: category,
+                                                child: Row(
+                                                  children: [
+                                                    Icon(category.icon),
+                                                    SizedBox(width: 12),
+                                                    Text(category.name),
+                                                  ],
+                                                ),
+                                              ),
+                                        )
+                                        .toList(),
+                                    onChanged: (Category? value) {
+                                      setState(() {
+                                        newTaskCategory = value;
+                                      });
+                                    },
+                                    hint: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        "Select a category",
+                                        style: TextStyle(
+                                          color: Color(0xFFA89B8F),
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.normal,
+                                        ),
+                                      ),
+                                    ),
+                                    isExpanded: true,
+                                    decoration: InputDecoration(
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(
+                                          color: Color(0xFFFFB35F),
+                                          width: 2,
+                                        ),
+                                      ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(
+                                          color: Color(0xFFE5D7C8),
+                                        ),
+                                      ),
+                                    ),
+                                    dropdownStyleData: DropdownStyleData(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      elevation: 6,
+                                    ),
+                                    buttonStyleData: ButtonStyleData(
+                                      padding: EdgeInsets.only(
+                                        right: 8,
+                                        left: 16,
+                                      ),
+                                    ),
+                                    iconStyleData: IconStyleData(
+                                      icon: Icon(
+                                        Icons.keyboard_arrow_down_rounded,
+                                        size: 28,
+                                        color: Color(0xFF625B54),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 20),
+                                  SafeArea(
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        if (_formKey.currentState!.validate()) {
+                                          setState(() {
+                                            tasks.add(
+                                              Task(
+                                                title: taskController.text,
+                                                category: newTaskCategory!,
+                                                dueDate:
+                                                    newTaskDueDate ??
+                                                    DateTime.now(),
+                                              ),
+                                            );
+                                            newTaskDueDate = null;
+                                            newTaskCategory = null;
+                                            taskController.clear();
+                                            dueDateController.clear();
+                                            Navigator.pop(context);
+                                          });
+                                        }
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Color(0xFFFD8F35),
+                                        foregroundColor: Colors.white,
+                                        minimumSize: Size(double.infinity, 50),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            15,
+                                          ),
+                                        ),
+                                        elevation: 2,
+                                      ),
+                                      child: const Text(
+                                        "Add Task",
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
                     setState(() {});
                   },
                   label: Text(
@@ -319,6 +603,19 @@ class _InputPageState extends State<InputPage> {
                       }
                       setState(() {
                         task.isCompleted = value;
+                        tasks.remove(task);
+                        if (value) {
+                          tasks.add(task);
+                        } else {
+                          int insertIndex = tasks.length;
+                          for (int i = 0; i < tasks.length; i++) {
+                            if (tasks[i].isCompleted) {
+                              insertIndex = i;
+                              break;
+                            }
+                          }
+                          tasks.insert(insertIndex, task);
+                        }
                       });
                     },
                     onDelete: () {
