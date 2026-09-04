@@ -537,11 +537,73 @@ class _InputPageState extends State<InputPage> {
     resetNewCategoryForm();
   }
 
+
+  Future<void> _showMoreMenu() async {
+    final renderBox =
+    _moreButtonKey.currentContext!.findRenderObject() as RenderBox;
+
+    final overlay =
+    Overlay.of(context).context.findRenderObject() as RenderBox;
+
+    final position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        renderBox.localToGlobal(
+          Offset(0, renderBox.size.height + 4),
+          ancestor: overlay,
+        ),
+        renderBox.localToGlobal(
+          renderBox.size.bottomRight(Offset.zero),
+          ancestor: overlay,
+        ),
+      ),
+      Offset.zero & overlay.size,
+    );
+
+    final selected = await showMenu<Category>(
+      context: context,
+      position: position,
+      color: Color(0xFFF8F1EE),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      constraints: const BoxConstraints(
+        minWidth: 10,
+        maxWidth: 150,
+      ),
+      items: hiddenCategories.map((category) {
+        return PopupMenuItem<Category>(
+          value: category,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 6,
+            ),
+            decoration: BoxDecoration(
+              color: selectedHiddenCategory == category.name
+                  ? const Color(0xFFFFE8CC)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(category.name),
+          ),
+        );
+      }).toList(),
+    );
+
+    if (selected != null) {
+      setState(() {
+        selectedCategory = selected.name;
+        selectedHiddenCategory = selected.name;
+      });
+    }
+  }
+  
   Widget _buildMoreDropdown() {
     return CategoryFilterChip(
       key: _moreButtonKey,
       categoryName: "More",
-      onTapAction: () {},
+      onTapAction: _showMoreMenu,
       isSelected: selectedHiddenCategory != null,
     );
   }
