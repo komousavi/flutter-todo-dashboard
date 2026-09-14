@@ -17,17 +17,20 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'add_category_button.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'database/app_database.dart' as db;
+import 'repositories/todo_repository.dart';
+import 'database/categories.dart';
+import 'package:drift/drift.dart' as drift;
 
 class InputPage extends StatefulWidget {
   const InputPage({super.key});
-
   @override
   State<InputPage> createState() => _InputPageState();
 }
 
 class _InputPageState extends State<InputPage> {
   DateTime selectedDate = DateTime.now();
-  List<Category> get categories => CategoryData.all;
+  List<Category> get categories => databaseCategories;
   String selectedCategory = "All";
   String? selectedHiddenCategory;
 
@@ -54,10 +57,93 @@ class _InputPageState extends State<InputPage> {
   IconData? newCategoryIcon;
   Color? newCategoryColor;
 
+  List<Category> databaseCategories = [];
+  late final db.AppDatabase database;
+  late final TodoRepository repository;
+
+  @override
+  void initState() {
+    super.initState();
+    database = db.AppDatabase();
+    repository = TodoRepository(database);
+
+    // loadTasks();
+    loadCategories();
+  }
+
+  Future<void> loadTasks() async {
+    final loadedTasks = await repository.getAllTasks();
+    print(loadedTasks);
+  }
+
+  Future<void> loadCategories() async {
+    final loadedCategories = await repository.getAllCategories();
+
+    setState(() {
+      databaseCategories = loadedCategories.map((category) {
+        return Category(
+          name: category.name,
+          color: Color(category.color),
+          completedTasks: 0,
+          total: 0,
+          icon: IconData(
+            category.iconCodePoint,
+            fontFamily: category.iconFontFamily,
+            fontPackage: category.iconFontPackage,
+          ),
+        );
+      }).toList();
+    });
+  }
+
   void resetNewCategoryForm() {
     newCategoryNameController.clear();
     newCategoryIcon = null;
     newCategoryColor = null;
+  }
+
+  Future<void> _confirmDeleteCategory(Category category) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Delete category?"),
+          content: Text('Are you sure you want to delete "${category.name}"?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: const Text("Delete"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDelete != true) {
+      return;
+    }
+    final databaseCategories = await repository.getAllCategories();
+
+    final matchingCategories = databaseCategories.where(
+      (databaseCategory) => databaseCategory.name == category.name,
+    );
+
+    if (matchingCategories.isEmpty) {
+      return;
+    }
+
+    final matchingDatabaseCategory = matchingCategories.first;
+
+    await repository.deleteCategory(matchingDatabaseCategory);
+    await loadCategories();
   }
 
   Future<DateTime?> _selectDate({required DateTime firstDate}) async {
@@ -159,12 +245,6 @@ class _InputPageState extends State<InputPage> {
                           validator: (value) {
                             if (value == null) {
                               return "Please select an icon";
-                            }
-                            final iconAlreadyExists = CategoryData.all.any(
-                              (category) => category.icon == value,
-                            );
-                            if (iconAlreadyExists) {
-                              return "This icon is already being used";
                             }
                             return null;
                           },
@@ -283,15 +363,6 @@ class _InputPageState extends State<InputPage> {
                             if (value == null) {
                               return "Please select a color";
                             }
-
-                            final colorAlreadyExists = CategoryData.all.any(
-                              (category) => category.color == value,
-                            );
-
-                            if (colorAlreadyExists) {
-                              return "This color is already being used";
-                            }
-
                             return null;
                           },
 
@@ -449,7 +520,7 @@ class _InputPageState extends State<InputPage> {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (!_newCategoryFormKey.currentState!.validate()) {
                       return;
                     }
@@ -467,10 +538,8 @@ class _InputPageState extends State<InputPage> {
                     }
                     final categoryName = newCategoryNameController.text.trim();
 
-                    final alreadyExists = CategoryData.all.any(
-                      (category) =>
-                          category.name.toLowerCase() ==
-                          categoryName.toLowerCase(),
+                    final alreadyExists = await repository.categoryNameExists(
+                      categoryName,
                     );
 
                     if (alreadyExists) {
@@ -482,9 +551,8 @@ class _InputPageState extends State<InputPage> {
                       return;
                     }
 
-                    final iconAlreadyExists = CategoryData.all.any(
-                      (category) => category.icon == newCategoryIcon,
-                    );
+                    final iconAlreadyExists = await repository
+                        .categoryIconExists(newCategoryIcon!.codePoint);
 
                     if (iconAlreadyExists) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -494,9 +562,9 @@ class _InputPageState extends State<InputPage> {
                       );
                       return;
                     }
-                    final colorAlreadyExists = CategoryData.all.any(
-                      (category) => category.color == newCategoryColor,
-                    );
+
+                    final colorAlreadyExists = await repository
+                        .categoryColorExists(newCategoryColor!.value);
 
                     if (colorAlreadyExists) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -506,15 +574,22 @@ class _InputPageState extends State<InputPage> {
                       );
                       return;
                     }
-                    final newCategory = Category(
-                      name: categoryName,
-                      color: newCategoryColor!,
-                      completedTasks: 0,
-                      icon: newCategoryIcon!,
+                    await repository.addCategory(
+                      db.CategoriesCompanion.insert(
+                        name: categoryName,
+                        color: newCategoryColor!.value,
+                        iconCodePoint: newCategoryIcon!.codePoint,
+                        iconFontFamily: newCategoryIcon!.fontFamily!,
+                        iconFontPackage: drift.Value(
+                          newCategoryIcon!.fontPackage,
+                        ),
+                      ),
                     );
-                    setState(() {
-                      CategoryData.all.add(newCategory);
-                    });
+
+                    await loadCategories();
+                    //  setState(() {
+                    // CategoryData.all.add(newCategory);
+                    //  });
                     //resetNewCategoryForm();
                     Navigator.pop(context);
                   },
@@ -537,13 +612,11 @@ class _InputPageState extends State<InputPage> {
     resetNewCategoryForm();
   }
 
-
   Future<void> _showMoreMenu() async {
     final renderBox =
-    _moreButtonKey.currentContext!.findRenderObject() as RenderBox;
+        _moreButtonKey.currentContext!.findRenderObject() as RenderBox;
 
-    final overlay =
-    Overlay.of(context).context.findRenderObject() as RenderBox;
+    final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
 
     final position = RelativeRect.fromRect(
       Rect.fromPoints(
@@ -563,22 +636,14 @@ class _InputPageState extends State<InputPage> {
       context: context,
       position: position,
       color: Color(0xFFF8F1EE),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      constraints: const BoxConstraints(
-        minWidth: 10,
-        maxWidth: 150,
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      constraints: const BoxConstraints(minWidth: 10, maxWidth: 150),
       items: hiddenCategories.map((category) {
         return PopupMenuItem<Category>(
           value: category,
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: 6,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
             decoration: BoxDecoration(
               color: selectedHiddenCategory == category.name
                   ? const Color(0xFFFFE8CC)
@@ -598,7 +663,7 @@ class _InputPageState extends State<InputPage> {
       });
     }
   }
-  
+
   Widget _buildMoreDropdown() {
     return CategoryFilterChip(
       key: _moreButtonKey,
@@ -761,43 +826,43 @@ class _InputPageState extends State<InputPage> {
               ),
             ),
 
-            ReusableCard(
-              thisColor: AppColors.primaryBackGroundColor,
-              thisMargin: const EdgeInsets.all(20),
-              cardChild: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('By Category', style: AppTextStyles.cardsTitle),
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: AspectRatio(
-                              aspectRatio: 1,
-                              child: CategoryChart(),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 3,
-                          child: Column(
-                            children: [
-                              ...categories.map((category) {
-                                return CategoryTile(category: category);
-                              }),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            // ReusableCard(
+            //   thisColor: AppColors.primaryBackGroundColor,
+            //   thisMargin: const EdgeInsets.all(20),
+            //   cardChild: Padding(
+            //     padding: const EdgeInsets.all(8.0),
+            //     child: Column(
+            //       crossAxisAlignment: CrossAxisAlignment.start,
+            //       children: [
+            //         Text('By Category', style: AppTextStyles.cardsTitle),
+            //         Row(
+            //           children: [
+            //             Expanded(
+            //               flex: 2,
+            //               child: Padding(
+            //                 padding: const EdgeInsets.all(20),
+            //                 child: AspectRatio(
+            //                   aspectRatio: 1,
+            //                   child: CategoryChart(),
+            //                 ),
+            //               ),
+            //             ),
+            //             Expanded(
+            //               flex: 3,
+            //               child: Column(
+            //                 children: [
+            //                   ...categories.map((category) {
+            //                     return CategoryTile(category: category);
+            //                   }),
+            //                 ],
+            //               ),
+            //             ),
+            //           ],
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
             // category filter chip
             ReusableCard(
               thisColor: AppColors.primaryBackGroundColor,
@@ -825,6 +890,9 @@ class _InputPageState extends State<InputPage> {
                             selectedCategory = category.name;
                             selectedHiddenCategory = null;
                           });
+                        },
+                        onLongPress: () {
+                          _confirmDeleteCategory(category);
                         },
                         isSelected: selectedCategory == category.name,
                       ),
